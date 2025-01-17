@@ -1,11 +1,10 @@
-import { app, BrowserWindow, Menu } from 'electron';
-import { ipcMainHandle, ipcMainOn, isDev } from './util.js';
-import { getStaticData, pollResources } from './resourceManager.js';
-import { getPreloadPath, getUIPath } from './pathResolver.js';
-import { createTray } from './tray.js';
-import { createMenu } from './menu.js';
+import { app, BrowserWindow, Menu } from "electron";
+import { ipcMainHandle, ipcMainOn, isDev } from "./util.js";
+import { getPreloadPath, getUIPath } from "./pathResolver.js";
+import { createTray } from "./tray.js";
+import { createMenu } from "./menu.js";
 
-app.on('ready', () => {
+app.on("ready", () => {
   const mainWindow = new BrowserWindow({
     webPreferences: {
       preload: getPreloadPath(),
@@ -13,27 +12,24 @@ app.on('ready', () => {
     // disables default system frame (dont do this if you want a proper working menu bar)
     frame: false,
   });
+
   if (isDev()) {
-    mainWindow.loadURL('http://localhost:5123');
+    mainWindow.loadURL("http://localhost:5123");
   } else {
     mainWindow.loadFile(getUIPath());
   }
 
-  pollResources(mainWindow);
+  ipcMainOn("sendFrameAction", (payload) => {
+    console.log("sendFrameAction payload is : " + payload);
 
-  ipcMainHandle('getStaticData', () => {
-    return getStaticData();
-  });
-
-  ipcMainOn('sendFrameAction', (payload) => {
     switch (payload) {
-      case 'CLOSE':
+      case "CLOSE":
         mainWindow.close();
         break;
-      case 'MAXIMIZE':
+      case "MAXIMIZE":
         mainWindow.maximize();
         break;
-      case 'MINIMIZE':
+      case "MINIMIZE":
         mainWindow.minimize();
         break;
     }
@@ -47,7 +43,7 @@ app.on('ready', () => {
 function handleCloseEvents(mainWindow: BrowserWindow) {
   let willClose = false;
 
-  mainWindow.on('close', (e) => {
+  mainWindow.on("close", (e) => {
     if (willClose) {
       return;
     }
@@ -58,11 +54,11 @@ function handleCloseEvents(mainWindow: BrowserWindow) {
     }
   });
 
-  app.on('before-quit', () => {
+  app.on("before-quit", () => {
     willClose = true;
   });
 
-  mainWindow.on('show', () => {
+  mainWindow.on("show", () => {
     willClose = false;
   });
 }

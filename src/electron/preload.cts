@@ -1,18 +1,11 @@
-const electron = require('electron');
+const electron = require("electron");
 
-electron.contextBridge.exposeInMainWorld('electron', {
-  subscribeStatistics: (callback) =>
-    ipcOn('statistics', (stats) => {
-      callback(stats);
-    }),
-  subscribeChangeView: (callback) =>
-    ipcOn('changeView', (view) => {
-      callback(view);
-    }),
-  getStaticData: () => ipcInvoke('getStaticData'),
-  sendFrameAction: (payload) => ipcSend('sendFrameAction', payload),
-} satisfies Window['electron']);
+// INFO: the renderer process has no Node.js or Electron module access. As an app developer, you need to choose which APIs to expose from your preload script using the contextBridge API.
+electron.contextBridge.exposeInMainWorld("electron", {
+  sendFrameAction: (payload) => ipcSend("sendFrameAction", payload),
+} satisfies Window["electron"]);
 
+// INFO: Renderer to main (two-way). ipcMainHandle is the handler
 function ipcInvoke<Key extends keyof EventPayloadMapping>(
   key: Key
 ): Promise<EventPayloadMapping[Key]> {
@@ -28,6 +21,7 @@ function ipcOn<Key extends keyof EventPayloadMapping>(
   return () => electron.ipcRenderer.off(key, cb);
 }
 
+// INFO: Renderer to main (one-way). ipcOn is the handler
 function ipcSend<Key extends keyof EventPayloadMapping>(
   key: Key,
   payload: EventPayloadMapping[Key]

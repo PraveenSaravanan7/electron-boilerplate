@@ -6,6 +6,7 @@ export function isDev(): boolean {
   return process.env.NODE_ENV === 'development';
 }
 
+// INFO: Handle events from ipcInvoke
 export function ipcMainHandle<Key extends keyof EventPayloadMapping>(
   key: Key,
   handler: () => EventPayloadMapping[Key]
@@ -16,6 +17,7 @@ export function ipcMainHandle<Key extends keyof EventPayloadMapping>(
   });
 }
 
+// INFO: Handle events from ipcSend
 export function ipcMainOn<Key extends keyof EventPayloadMapping>(
   key: Key,
   handler: (payload: EventPayloadMapping[Key]) => void
@@ -26,6 +28,7 @@ export function ipcMainOn<Key extends keyof EventPayloadMapping>(
   });
 }
 
+// INFO: Main to renderer. ipcOn handles it
 export function ipcWebContentsSend<Key extends keyof EventPayloadMapping>(
   key: Key,
   webContents: WebContents,
