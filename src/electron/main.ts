@@ -1,11 +1,34 @@
-import { app, BrowserWindow, Menu } from 'electron';
-import { ipcMainHandle, ipcMainOn, isDev } from './util.js';
-import { getStaticData, pollResources } from './resourceManager.js';
-import { getPreloadPath, getUIPath } from './pathResolver.js';
-import { createTray } from './tray.js';
-import { createMenu } from './menu.js';
+import { app, BrowserWindow, Menu } from "electron";
+import { ipcMainHandle, ipcMainOn, isDev } from "./util.js";
+import { getStaticData, pollResources } from "./resourceManager.js";
+import { getPreloadPath, getUIPath } from "./pathResolver.js";
+import { createTray } from "./tray.js";
+import { createMenu } from "./menu.js";
+import { DataSource } from "typeorm";
 
-app.on('ready', () => {
+
+const getUserData = async () => {
+  const database = new DataSource({
+    type: "mysql",
+    host: "localhost",
+    port: 3306,
+    username: "root",
+    password: "rootsecret",
+    database: "DUMMY",
+    synchronize: false,
+    logging: true
+  });
+
+  await database.driver.connect();
+
+  const users = await database.query('SELECT * FROM Employees');
+
+  console.log(users)
+
+  return users;
+};
+
+app.on("ready", () => {
   const mainWindow = new BrowserWindow({
     webPreferences: {
       preload: getPreloadPath(),
@@ -14,26 +37,30 @@ app.on('ready', () => {
     frame: false,
   });
   if (isDev()) {
-    mainWindow.loadURL('http://localhost:5123');
+    mainWindow.loadURL("http://localhost:5123");
   } else {
     mainWindow.loadFile(getUIPath());
   }
 
   pollResources(mainWindow);
 
-  ipcMainHandle('getStaticData', () => {
+  ipcMainHandle("getStaticData", () => {
     return getStaticData();
   });
 
-  ipcMainOn('sendFrameAction', (payload) => {
+  ipcMainHandle("getUserData", () => {
+    return getUserData();
+  });
+
+  ipcMainOn("sendFrameAction", (payload) => {
     switch (payload) {
-      case 'CLOSE':
+      case "CLOSE":
         mainWindow.close();
         break;
-      case 'MAXIMIZE':
+      case "MAXIMIZE":
         mainWindow.maximize();
         break;
-      case 'MINIMIZE':
+      case "MINIMIZE":
         mainWindow.minimize();
         break;
     }
@@ -47,7 +74,7 @@ app.on('ready', () => {
 function handleCloseEvents(mainWindow: BrowserWindow) {
   let willClose = false;
 
-  mainWindow.on('close', (e) => {
+  mainWindow.on("close", (e) => {
     if (willClose) {
       return;
     }
@@ -58,11 +85,14 @@ function handleCloseEvents(mainWindow: BrowserWindow) {
     }
   });
 
-  app.on('before-quit', () => {
+  app.on("before-quit", () => {
     willClose = true;
   });
 
-  mainWindow.on('show', () => {
+  mainWindow.on("show", () => {
     willClose = false;
   });
+
+  console.log("Hello Electron");
+
 }

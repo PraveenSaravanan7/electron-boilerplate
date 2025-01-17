@@ -18,10 +18,12 @@
     "test:unit": "vitest src"
   },
   "dependencies": {
+    "mysql2": "^3.11.3",
     "os-utils": "^0.0.14",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "recharts": "^2.12.7"
+    "recharts": "^2.12.7",
+    "typeorm": "^0.3.20"
   },
   "devDependencies": {
     "@playwright/test": "^1.47.2",

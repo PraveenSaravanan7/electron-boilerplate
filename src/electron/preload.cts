@@ -10,6 +10,7 @@ electron.contextBridge.exposeInMainWorld('electron', {
       callback(view);
     }),
   getStaticData: () => ipcInvoke('getStaticData'),
+  getUserData: () => ipcInvoke('getUserData'),
   sendFrameAction: (payload) => ipcSend('sendFrameAction', payload),
 } satisfies Window['electron']);
 

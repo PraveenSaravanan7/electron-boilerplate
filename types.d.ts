@@ -10,6 +10,8 @@ type StaticData = {
   totalMemoryGB: number;
 };
 
+type UserData = {FirstName: string, LastName: string}[];
+
 type View = 'CPU' | 'RAM' | 'STORAGE';
 
 type FrameWindowAction = 'CLOSE' | 'MAXIMIZE' | 'MINIMIZE';
@@ -19,6 +21,7 @@ type EventPayloadMapping = {
   getStaticData: StaticData;
   changeView: View;
   sendFrameAction: FrameWindowAction;
+  getUserData: Promise<UserData>
 };
 
 type UnsubscribeFunction = () => void;
@@ -29,6 +32,7 @@ interface Window {
       callback: (statistics: Statistics) => void
     ) => UnsubscribeFunction;
     getStaticData: () => Promise<StaticData>;
+    getUserData: () => Promise<Promise<UserData>>;
     subscribeChangeView: (
       callback: (view: View) => void
     ) => UnsubscribeFunction;

@@ -6,6 +6,7 @@ import { Chart } from './Chart';
 
 function App() {
   const staticData = useStaticData();
+  const userData = useUserData();
   const statistics = useStatistics(10);
   const [activeView, setActiveView] = useState<View>('CPU');
   const cpuUsages = useMemo(
@@ -40,6 +41,7 @@ function App() {
       <Header />
       <div className="main">
         <div>
+          <p>{JSON.stringify(userData)}</p>
           <SelectOption
             onClick={() => setActiveView('CPU')}
             title="CPU"
@@ -119,6 +121,18 @@ function useStaticData() {
   useEffect(() => {
     (async () => {
       setStaticData(await window.electron.getStaticData());
+    })();
+  }, []);
+
+  return staticData;
+}
+
+function useUserData() {
+  const [staticData, setStaticData] = useState<UserData | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      setStaticData(await window.electron.getUserData());
     })();
   }, []);
 
